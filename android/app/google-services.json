@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "768012370397",
+    "project_id": "just-homes-80480",
+    "storage_bucket": "just-homes-80480.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768012370397:android:b3d37aa222e76f7558f634",
+        "android_client_info": {
+          "package_name": "ke.co.justhomes.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp1dpgDwMqeqXBtyNV4L5XC3bzMIgL4So"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

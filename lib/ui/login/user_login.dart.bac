@@ -1,0 +1,110 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:just_apartment_live/ui/dashboard/dashboard_page.dart';
+
+class UserController {
+  static User? user = FirebaseAuth.instance.currentUser;
+
+  static Future<User?> loginWithGoogle() async {
+    final googleAccount = await GoogleSignIn().signIn();
+
+    final googleAuth = await googleAccount.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(
+      credential,
+    );
+    return userCredential.user;
+  }
+
+  static Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+  }
+}
+
+class LoginPage2 extends StatefulWidget {
+  @override
+  State<LoginPage2> createState() => _LoginPage2State();
+}
+
+class _LoginPage2State extends State<LoginPage2> {
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Scaffold(
+      body: SafeArea(
+        minimum: const EdgeInsets.all(20),
+        child: Center(
+          child: Column(
+            children: [
+              const Spacer(),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 380),
+                child: Image.asset('assets/food.png'),
+              ),
+              const Spacer(),
+              Text(
+                'Order your favorite Japanese food',
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: 30, bottom: 30),
+                child: Text(
+                  "When you order, we'll hook you up with exclusive coupons and special offers",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              /**/
+
+              ElevatedButton(
+                // style: ThemeHelper().buttonStyle(),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(40, 10, 40, 10),
+                  child: Text(
+                    'Login'.toUpperCase(),
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                ),
+                onPressed: () => _handleLogin(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _handleLogin(BuildContext context) async {
+    try {
+      final user = await UserController.loginWithGoogle();
+      if (user != null && mounted) {
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => DashBoardPage()));
+      }
+    } on FirebaseAuthException catch (error) {
+      //print(error.message);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+        error.message ?? "Something went wrong",
+      )));
+    } catch (error) {
+      // print(error);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+        error.toString(),
+      )));
+    }
+  }
+}

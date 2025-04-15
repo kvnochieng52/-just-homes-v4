@@ -1,0 +1,117 @@
+import 'package:ff_navigation_bar/ff_navigation_bar.dart';
+import 'package:flutter/material.dart';
+import 'package:just_apartment_live/ui/dashboard/dashboard_page.dart';
+import 'package:just_apartment_live/ui/favorites/favorites_page.dart';
+import 'package:just_apartment_live/ui/property/property_by_type_page.dart';
+import 'package:just_apartment_live/ui/property/search_page.dart';
+import 'package:just_apartment_live/ui/property/search_results_page.dart';
+
+class FooterRedifinedWidget extends StatefulWidget {
+  final ValueChanged<int> onIndexChanged; // Callback function
+
+  FooterRedifinedWidget({required this.onIndexChanged});
+
+  @override
+  _FooterRedifinedWidgetState createState() => _FooterRedifinedWidgetState();
+}
+
+class _FooterRedifinedWidgetState extends State<FooterRedifinedWidget> {
+  int _selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return FFNavigationBar(
+      theme: FFNavigationBarTheme(
+        barBackgroundColor: Color.fromARGB(255, 37, 39, 66),
+        selectedItemBorderColor: Colors.transparent,
+        selectedItemBackgroundColor: Colors.white,
+        selectedItemIconColor: Color.fromARGB(255, 37, 39, 66),
+        selectedItemLabelColor: Colors.white,
+        showSelectedItemShadow: true,
+        barHeight: 50,
+      ),
+      selectedIndex: _selectedIndex,
+      onSelectTab: (index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+
+        widget.onIndexChanged(index); // Notify parent
+
+        if (_selectedIndex == 0) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return DashBoardPage();
+            }),
+          );
+        }
+
+        if (_selectedIndex == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return PropertyByTypePage(
+                leaseType: "1",
+                selectedIndex: 1,
+              );
+            }),
+          );
+        }
+
+        if (_selectedIndex == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SearchPage(),
+            ),
+          );
+        }
+
+        if (_selectedIndex == 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SearchPage(),
+            ),
+          );
+        }
+
+        if (_selectedIndex == 4) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SearchPage(),
+            ),
+          );
+        }
+      },
+      items: [
+        FFNavigationBarItem(
+          iconData: Icons.dashboard,
+          label: 'Home',
+        ),
+        FFNavigationBarItem(
+          iconData: Icons.home_work_outlined,
+          label: ' Rent',
+          selectedBackgroundColor: Colors.grey,
+        ),
+        FFNavigationBarItem(
+          iconData: Icons.house,
+          label: 'Sale',
+          selectedBackgroundColor: Colors.grey,
+        ),
+        FFNavigationBarItem(
+          iconData: Icons.video_collection_outlined,
+          label: 'Reels',
+          selectedBackgroundColor: Colors.grey,
+        ),
+        FFNavigationBarItem(
+          iconData: Icons.favorite,
+          label: 'Favorites',
+          selectedBackgroundColor: Colors.grey,
+        ),
+      ],
+    );
+  }
+}

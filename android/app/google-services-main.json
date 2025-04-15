@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "622627495699",
+    "project_id": "just-apartment-app",
+    "storage_bucket": "just-apartment-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:622627495699:android:486dc8c9ea11633a7c84e6",
+        "android_client_info": {
+          "package_name": "net.justapartments.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "622627495699-tvbhs7tb00pdq5g676uk5bs1mg9vhfcl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.justapartments.app",
+            "certificate_hash": "b0533cfa2ddec91ae1d5a0104ce4bf6fedb19b2c"
+          }
+        },
+        {
+          "client_id": "622627495699-dbi77ih17ue963ftk4b19dmdi92sc4ts.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEwGyTA5whKicahsR6qI7cHQqY-Sn6Z9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "622627495699-dbi77ih17ue963ftk4b19dmdi92sc4ts.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "622627495699-9fkit32qb4h21jhvs6ipqmv0b25kekq7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "net.justapartments.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
