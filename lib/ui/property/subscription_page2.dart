@@ -101,7 +101,7 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: HexColor('#4CAF50')),
-                      child: const Text("Upgrade Subscription",
+                      child: const Text("Click here & select option to Upgrade",
                           style: TextStyle(color: Colors.white)),
                     ),
                   if (shouldShowRenewButton &&
@@ -116,7 +116,8 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
                       },
                       style:
                           ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                      child: const Text("Renew Subscription",
+                      child: const Text(
+                          "Click Here & Select your plan to Renew",
                           style: TextStyle(color: Colors.white)),
                     ),
                   if (_showUpgradeOptions || _showRenewOptions)
@@ -184,6 +185,7 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
     final selectedPlanIdcon = selectedPlanId.toString();
 
     if (selectedPlanId != null && selectedPlanId > 0) {
+      print("PASSING BY: HERE 1");
       setState(() {
         _formSubmitted = true;
       });
@@ -347,6 +349,7 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
         }
       }
     } else {
+      print("PASSING BY: HERE 2");
       setState(() {
         _formSubmitted = true;
       });
@@ -482,7 +485,7 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
             )
           else
             Text(
-              "Please renew your subscription for your properties to get Approved & Listed",
+              "Please renew your subscription for your properties to get Approved & Listed. Click on the Renew button to",
               style: const TextStyle(fontSize: 14, color: Colors.red),
             ),
           const SizedBox(height: 8),
