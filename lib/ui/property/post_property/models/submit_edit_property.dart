@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:just_apartment_live/ui/property/post_step2_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PropertySubmissionService {
+class PropertyEditSubmissionService {
   // For creating new properties
   Future<Map<String, dynamic>> submitProperty({
     required int step,
@@ -105,64 +105,77 @@ class PropertySubmissionService {
     required String address,
     required int userId,
     required String images,
-    String removedImages = '',
+    required String removedImages,
     required int propertyID,
     required BuildContext context,
     required String link,
   }) async {
+    print("Editing property...");
+
+    await clearSavedImages();
+
+    final String url = "${link}api/property/edit-property";
+
+    final Map<String, dynamic> bodyParams = {
+      "step": step.toString(),
+      "propertyTitle": propertyTitle,
+      "town": town,
+      "subRegion": subRegion,
+      "latitude": latitude.toString(),
+      "longitude": longitude.toString(),
+      "country": country,
+      "countryCode": countryCode,
+      "address": address,
+      "user_id": userId.toString(),
+      "images": images,
+      "removedImages": removedImages,
+      "propertyID": propertyID.toString(),
+    };
+
+    print("Request Body: $bodyParams");
+
     try {
-      debugPrint('Sending edit property request for ID: $propertyID');
-      debugPrint('Images: $images');
-      debugPrint('Removed Images: $removedImages');
-
-      final url = Uri.parse('${link}api/property/edit-property');
-
-      final body = {
-        'step': step,
-        'propertyTitle': propertyTitle,
-        'town': town,
-        'subRegion': subRegion,
-        'latitude': latitude,
-        'longitude': longitude,
-        'country': country,
-        'countryCode': countryCode,
-        'address': address,
-        'user_id': userId,
-        'images': images,
-        'propertyID': propertyID,
-      };
-
-      if (removedImages.isNotEmpty) {
-        body['removedImages'] = removedImages;
-      }
-
       final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
+        Uri.parse(url),
+        body: bodyParams,
       );
 
-      final responseData = jsonDecode(response.body);
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
 
-      if (response.statusCode == 200 && responseData['success'] == true) {
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  PostStep2Page(propertyID: propertyID.toString()),
-            ),
-          );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        if (responseData['success']) {
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    PostStep2Page(propertyID: propertyID.toString()),
+              ),
+            );
+          }
+          return {"success": true, "propertyID": propertyID.toString()};
+        } else {
+          return {
+            "success": false,
+            "message": responseData['message'] ?? "Failed to edit property",
+            "error": responseData,
+          };
         }
-        return {'success': true, 'propertyID': propertyID.toString()};
       } else {
-        throw Exception(responseData['message'] ?? 'Failed to update property');
+        return {
+          "success": false,
+          "message": "Failed to edit property",
+          "error": jsonDecode(response.body),
+        };
       }
     } catch (e) {
-      debugPrint('Error editing property: $e');
       return {
-        'success': false,
-        'message': 'Failed to update property. Please try again.',
+        "success": false,
+        "message": "An error occurred",
+        "error": e.toString(),
       };
     }
   }

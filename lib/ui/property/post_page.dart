@@ -5,21 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:just_apartment_live/api/api.dart';
 import 'package:just_apartment_live/models/configuration.dart';
+import 'package:just_apartment_live/ui/login/login.dart';
 import 'package:just_apartment_live/ui/property/post_property/models/submit_property.dart';
 import 'package:just_apartment_live/ui/property/post_property/widgets/GMaps.dart';
 import 'package:just_apartment_live/ui/property/subscription_status_card.dart';
 import 'package:just_apartment_live/widgets/header_main_widget.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:just_apartment_live/ui/property/post_property/widgets/submit_button.dart';
 import 'package:just_apartment_live/ui/property/post_property/widgets/image_preview.dart';
 import 'package:just_apartment_live/ui/property/post_property/widgets/town_input.dart';
-import 'package:just_apartment_live/ui/property/post_property/widgets/image_upload_input.dart';
 import 'package:just_apartment_live/ui/property/post_property/widgets/title.dart';
-import 'package:just_apartment_live/ui/property/post_property/widgets/regions_input.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class PostPage extends StatefulWidget {
   const PostPage({super.key});
@@ -37,222 +37,128 @@ class _PostPageState extends State<PostPage> {
   var _userTown = '';
   var _userRegion = '';
   var _userAddress = '';
-
   var _lat = 0.0;
   var _lon = 0.0;
-  var _userId = 0;
-
-  var _propertyID = 693;
 
   final _titleController = TextEditingController();
+  List<File> _images = [];
+  List<String> _uploadedImageUrls = [];
+  bool _isUploading = false;
+  bool _isSubmitting = false;
 
-  bool _isSubRegionEnabled = false;
-  bool _isLoadingSubRegions = false;
-
-  List<File> _images = []; // List of selected image files
-  List<AssetEntity> _assetEntities = []; // List of selected asset entities
-  List<String> uploadedImagePaths = [];
-
-  bool _initDataFetched = false;
-  bool _showRegionsInput = false;
-
-  List<Map<String, dynamic>> _townsList = [];
-  List<Map<String, dynamic>> _subRegionsList = [];
-
-  var _propertyDetails;
-  var _propertyFeaturesList;
-  Map<String, dynamic> selectedtown = {"id": 1, "value": "Apple"};
+  var _webUrl = '';
+  bool _hasGotApiLink = false;
 
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus();
     _fetchWebUrl();
-    _getInitData();
   }
 
-  var defaultImage = 'https://justhomes.co.ke/images/back6.jpg';
-  bool hasGotApiLink = false;
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    var user = json.decode(localStorage.getString('user') ?? '{}');
+    var user_id = user['id'];
 
-  var _webUrlFuture = '';
+    if (user_id == null) {
+      // User not logged in, navigate to LoginPage
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      }
+    }
+  }
 
   Future<void> _fetchWebUrl() async {
     try {
       final apiLink = await Configuration().getCountryApiLink();
-      _webUrlFuture = apiLink['web'].toString();
-      hasGotApiLink = true;
+      setState(() {
+        _webUrl = apiLink['web'].toString();
+        _hasGotApiLink = true;
+      });
     } catch (e) {
       print('Error fetching country API link: $e');
     }
   }
 
-  _getInitData() async {
-    await clearSavedImages();
+  Future<void> _handleImageSelection(List<File> newImages) async {
+    setState(() {
+      _images = newImages;
+      _isUploading = true;
+    });
 
-    SharedPreferences localStorage = await SharedPreferences.getInstance();
-    var user = json.decode(localStorage.getString('user') ?? '{}');
-
-    var data = {'user_id': user['id']};
-
-    var res = await CallApi().postData(data, 'property/get-init-data-part-one');
-
-    if (res.statusCode == 200) {
-      var body = json.decode(res.body);
-
-      if (body['success']) {
-        final List<dynamic> townData = body['data']['townsList'];
-        List<Map<String, dynamic>> towns = [];
-        for (var tData in townData) {
-          towns.add({
-            'id': tData['id'],
-            'value': tData['value'],
-          });
-        }
-
-        setState(() {
-          _townsList = towns;
-          _initDataFetched = true;
-        });
-      }
-    }
-  }
-
-  // _getSubRegions(townID) async {
-  //   setState(() {
-  //     _subRegionsList = [];
-  //     _isSubRegionEnabled = false;
-  //     _isLoadingSubRegions = true;
-  //   });
-  //
-  //   SharedPreferences localStorage = await SharedPreferences.getInstance();
-  //   var user = json.decode(localStorage.getString('user') ?? '{}');
-  //
-  //   var data = {
-  //     'townID': townID,
-  //     'user_id': user['id'],
-  //     'propertyID': _propertyID
-  //   };
-  //
-  //
-  //   print("PORST ------->"  + data.toString());
-  //
-  //
-  //   var res =
-  //   await CallApi().postData(data, 'property/get-sub-regions-and-post');
-  //
-  //
-  //   var body = json.decode(res.body);
-  //   print("SUBREGIONS------->" + body.toString());
-  //
-  //
-  //   // if (res.statusCode == 200) {
-  //   //   var body = json.decode(res.body);
-  //     if (body['success']) {
-  //       final List<dynamic> subRegionsData = body['data']['subRegionsList'];
-  //
-  //
-  //       print("SUBREGIONS---lll---->" + subRegionsData.toString());
-  //
-  //
-  //       List<Map<String, dynamic>> subRs = [];
-  //       for (var sregionData in subRegionsData) {
-  //         subRs.add({
-  //           'id': sregionData['id'],
-  //           'value': sregionData['value'],
-  //         });
-  //       }
-  //
-  //
-  //       print("SUBREGIONS----subRs--->" + subRs.toString());
-  //
-  //       setState(() {
-  //         _subRegionsList = subRs;
-  //         _isSubRegionEnabled = false;
-  //         _propertyID = body['data']['propertyID'];
-  //         _propertyDetails = body['data']['propertyDetails'];
-  //         _propertyFeaturesList = body['data']['propertyFeaturesList'];
-  //       });
-  //     }
-  //   // }
-  //
-  //   setState(() {
-  //     _isLoadingSubRegions = false;
-  //   });
-  // }
-
-  Future<void> clearSavedImages() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool isRemoved = await prefs
-          .remove('uploaded_images'); // Remove the stored image paths list
-      if (isRemoved) {
-        uploadedImagePaths.clear();
-        print('Saved image paths cleared.');
-      } else {
-        print('No saved image paths found.');
-      }
+      final uploadedUrls = await _uploadImages(_images);
+      setState(() {
+        _uploadedImageUrls = uploadedUrls;
+        _isUploading = false;
+      });
     } catch (e) {
-      print('Error clearing saved image paths: $e');
-    }
-  }
-
-  Future<void> pickAssets(BuildContext context) async {
-    try {
-      final PermissionState result =
-          await PhotoManager.requestPermissionExtend();
-      if (result.isAuth) {
-        final List<AssetEntity>? result = await AssetPicker.pickAssets(
-          context,
-          pickerConfig: AssetPickerConfig(
-            maxAssets: 20,
-            requestType: RequestType.image,
-            selectedAssets: _assetEntities,
-          ),
-        );
-
-        if (result != null) {
-          await clearSavedImages();
-          final List<File> newImages = [];
-          for (var asset in result) {
-            final File? file = await asset.file;
-            if (file != null && !_images.any((img) => img.path == file.path)) {
-              newImages.add(file);
-            }
-          }
-
-          setState(() {
-            _images.addAll(newImages);
-            _assetEntities = result;
-          });
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Permissions are required to pick images.'),
-          ),
-        );
-      }
-    } catch (e) {
-      print("Error picking assets: $e");
-
-      clearSavedImages();
+      setState(() => _isUploading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('An error occurred while picking images.'),
-        ),
+        SnackBar(content: Text('Failed to upload images: $e')),
       );
     }
   }
 
-  Future<void> uploadImages(File image) async {
-    // Simulate a network delay
-    await Future.delayed(const Duration(seconds: 2));
-    print("Uploaded image: ${image.path}");
+  Future<List<String>> _uploadImages(List<File> images) async {
+    final uploadedUrls = <String>[];
+
+    for (final image in images) {
+      try {
+        final url = await _uploadSingleImage(image);
+        uploadedUrls.add(url);
+      } catch (e) {
+        print('Error uploading image: $e');
+      }
+    }
+
+    return uploadedUrls;
   }
 
-  Future<void> uploadImage(File image) async {
-    // Simulate a network delay
-    await Future.delayed(const Duration(seconds: 2));
-    print("Uploaded image: ${image.path}");
+  Future<String> _uploadSingleImage(File image) async {
+    final link = _hasGotApiLink ? _webUrl : '';
+    final uri = Uri.parse('${link}api/property/upload-property-image');
+
+    final dir = await getTemporaryDirectory();
+    final targetPath =
+        path.join(dir.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      image.absolute.path,
+      targetPath,
+      quality: 60,
+    );
+
+    if (compressedFile == null) {
+      throw Exception('Failed to compress image');
+    }
+
+    final request = http.MultipartRequest('POST', uri);
+    request.files
+        .add(await http.MultipartFile.fromPath('image', compressedFile.path));
+
+    final response = await request.send();
+    final responseData = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(responseData);
+      return data['image_path'];
+    } else {
+      throw Exception('Failed to upload image: ${response.statusCode}');
+    }
+  }
+
+  void _handleImageRemove(int index) {
+    setState(() {
+      _images.removeAt(index);
+      if (index < _uploadedImageUrls.length) {
+        _uploadedImageUrls.removeAt(index);
+      }
+    });
   }
 
   @override
@@ -273,7 +179,7 @@ class _PostPageState extends State<PostPage> {
               child: Column(
                 children: [
                   _buildTitle(context),
-                  SubscriptionStatusCard(),
+                  const SubscriptionStatusCard(),
                   _buildPostForm(context),
                 ],
               ),
@@ -305,39 +211,17 @@ class _PostPageState extends State<PostPage> {
     );
   }
 
-  Future<void> _loadSavedImagePaths() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      uploadedImagePaths = prefs.getStringList('uploaded_images') ?? [];
-    });
-  }
-
   Widget _buildPostForm(context) {
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          // ImagePreview(
-          //   images: _images,
-          //   onRemoveImage: (index) {
-          //     setState(() {
-          //       _images.removeAt(index);
-          //       _assetEntities.removeAt(index);
-          //     });
-          //   },
-          //   onAddImage: () => pickAssets(context),
-          //   onUploadImage: uploadImages, // Only upload on form submission
-          // ),
-
           ImagePreview(
             images: _images,
-            onRemoveImage: (index) {
-              setState(() {
-                _images.removeAt(index);
-              });
-            },
-            onAddImage: () => pickAssets(context),
-            onUploadImage: uploadImages,
+            uploadedImageUrls: _uploadedImageUrls,
+            isUploading: _isUploading,
+            onImagesChanged: _handleImageSelection,
+            onRemoveImage: _handleImageRemove,
           ),
           TitleInput(
             titleController: _titleController,
@@ -348,16 +232,12 @@ class _PostPageState extends State<PostPage> {
               return null;
             },
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           LocationFormField(
             apiKey: 'AIzaSyCVvR6ZMW_H-c2O6Tjpcu1_ko8QkmkCfPQ',
             hintText: "Enter your location",
             onSaved: (value) {
               if (value != null) {
-                // print("Selected county: ${value['county']}");
-                // print("Selected locality: ${value['locality']}");
-                // print("Selected LAT: ${value['latitude']}");
-                // print("Selected LON: ${value['longitude']}");
                 _userTown = value['locality'] ?? "Nairobi";
                 _userRegion = value['county'] ?? "Nairobi";
                 _userAddress = value['mainText'];
@@ -366,59 +246,58 @@ class _PostPageState extends State<PostPage> {
               }
             },
           ),
-          // NextButtonWidget(
-          //   images: _images,
-          //   userTown: _userTown,
-          //   userRegion: _userRegion,
-          //   titleController: _titleController,
-          //   latitude: _lat,
-          //   longitude: _lon,
-          //   userId: _userId,
-          //   propertySubmissionService: _propertySubmissionService,
-          //   formKey: _formKey,
-          // )
-          SizedBox(height: 20),
-
+          const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () async {
-              _formKey.currentState!.save();
-              if (uploadedImagePaths.isEmpty) {
-                _loadSavedImagePaths();
-                setState(() {});
-              }
+            onPressed: (_isUploading || _isSubmitting)
+                ? null
+                : () async {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
 
-              print("MAPICHA $_images");
-              print("MAPICHA $uploadedImagePaths");
+                      if (_uploadedImageUrls.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please upload at least one image'),
+                          ),
+                        );
+                        return;
+                      }
 
-              SharedPreferences localStorage =
-                  await SharedPreferences.getInstance();
-              var user = json.decode(localStorage.getString('user') ?? '{}');
-              var userId = user['id'];
-              print("MAPICHA ----->>>> $userId");
+                      setState(() => _isSubmitting = true);
 
-              _propertySubmissionService.submitProperty(
-                step: 1,
-                propertyTitle: _titleController.text,
-                town: _userRegion,
-                subRegion: _userTown,
-                latitude: _lat,
-                longitude: _lon,
-                country: "Kenya",
-                countryCode: "KE",
-                address: _userAddress ?? "",
-                userId: userId,
-                images: uploadedImagePaths,
-                context: context,
-                link: hasGotApiLink ? _webUrlFuture : '',
-              );
-            },
+                      final localStorage =
+                          await SharedPreferences.getInstance();
+                      final user =
+                          json.decode(localStorage.getString('user') ?? '{}');
+                      final userId = user['id'];
+
+                      await _propertySubmissionService.submitProperty(
+                        step: 1,
+                        propertyTitle: _titleController.text,
+                        town: _userRegion,
+                        subRegion: _userTown,
+                        latitude: _lat,
+                        longitude: _lon,
+                        country: "Kenya",
+                        countryCode: "KE",
+                        address: _userAddress,
+                        userId: userId,
+                        images: _uploadedImageUrls,
+                        context: context,
+                        link: _hasGotApiLink ? _webUrl : '',
+                      );
+
+                      setState(() => _isSubmitting = false);
+                    }
+                  },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple, // Purple background color
-              foregroundColor: Colors.white, // White font color
-              minimumSize:
-                  const Size(double.infinity, 50), // Set a minimum height
+              backgroundColor: Colors.purple,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 50),
             ),
-            child: const Text("Next"),
+            child: (_isUploading || _isSubmitting)
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text("Next"),
           )
         ],
       ),

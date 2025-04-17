@@ -347,6 +347,9 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
         }
       }
     } else {
+      setState(() {
+        _formSubmitted = true;
+      });
       SharedPreferences localStorage = await SharedPreferences.getInstance();
       var user = json.decode(localStorage.getString('user') ?? '{}');
       var data = {'user_id': user['id'], 'propertyID': widget.propertyID};
@@ -367,6 +370,9 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
               ),
             );
           } else {
+            setState(() {
+              _formSubmitted = false;
+            });
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -397,6 +403,10 @@ class _SubscriptionPage2State extends State<SubscriptionPage2> {
               ],
             ),
           );
+
+          setState(() {
+            _formSubmitted = false;
+          });
         }
       } else {
         showDialog(
