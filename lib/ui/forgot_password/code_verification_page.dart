@@ -59,6 +59,7 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
     var data = {
       'user_id': widget.userDetails['id'],
+      'resetCode': widget.resetCode
     };
     var res = await CallApi().postData(data, 'user/resend-verify-code');
 
@@ -177,7 +178,7 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
         : TextButton(
             onPressed: () => _resendEmail(),
             child: Text(
-              'Resend Email',
+              'Resend Code',
               style: TextStyle(
                 color: HexColor('#252742'),
                 fontWeight: FontWeight.bold,

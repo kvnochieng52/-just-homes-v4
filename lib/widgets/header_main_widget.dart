@@ -14,6 +14,7 @@ import 'package:just_apartment_live/ui/property/property_slider.dart';
 import 'package:just_apartment_live/ui/property/search_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 const Color appBarColor = Color(0xFF252742); // Purple background color
 const String userKey = 'user';
@@ -78,28 +79,16 @@ Drawer buildDrawer(BuildContext context, {bool isPublic = false}) {
                   const AgentsPage()),
               buildDrawerItem(
                   context, Icons.search, 'Search Property', const SearchPage()),
-              // buildDrawerItem(
-              //     context, Icons.search, 'LOGIN TEST', SignInTestPage()),
               buildDrawerItem(
                   context,
                   Icons.house_outlined,
                   'OffPlan Properties',
                   const OffPlanPropertiesPage(selectedIndex: 2)),
-              // buildDrawerItem(
-              //     context,
-              //     Icons.house_siding_rounded,
-              //     'On Auction Properties',
-              //     const AuctionedPropertiesPage(selectedIndex: 2)),
               buildDrawerItem(
                   context,
                   Icons.house_siding_rounded,
                   'On Auction Properties',
                   const AuctionedPropertiesPage(selectedIndex: 2)),
-              // buildDrawerItemWithUrl(
-              //     context,
-              //     Icons.house_siding_rounded,
-              //     'Government Housing',
-              //     'https://government-housing.justhomes.co.ke/'),
               buildDrawerItem(
                   context, Icons.house, 'Post New Property', const PostPage()),
               buildLogoutItem(context),
@@ -107,6 +96,34 @@ Drawer buildDrawer(BuildContext context, {bool isPublic = false}) {
               if (isPublic) buildLoginItem(context),
             ],
           ),
+        ),
+        // Add version information at the bottom
+        // Alternative simpler version
+        FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text.rich(
+                  TextSpan(
+                    text: 'Version ',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
+                    children: [
+                      TextSpan(
+                        text:
+                            '${snapshot.data?.version} (${snapshot.data?.buildNumber})',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
       ],
     ),

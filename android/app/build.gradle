@@ -30,9 +30,9 @@ android {
 
     defaultConfig {
         applicationId "ke.co.justhomes.app"
-        minSdk = 24
+        minSdk = 24 
         targetSdk = flutter.targetSdkVersion
-        versionCode = 40
+        versionCode = 43
         versionName = flutter.versionName
     }
 

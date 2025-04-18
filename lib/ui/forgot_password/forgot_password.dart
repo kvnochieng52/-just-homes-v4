@@ -37,39 +37,42 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ],
       ),
       child: TextFormField(
-        controller: _emailController,
-        style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface), // Text color
-        decoration: ThemeHelper()
-            .textInputDecoration(
-              'Email Address',
-              'Enter your Email Address.',
-            )
-            .copyWith(
-              fillColor: Theme.of(context)
-                  .colorScheme
-                  .surface, // Background color for input
-              filled: true,
-              hintStyle: TextStyle(
-                color: Theme.of(context)
+          controller: _emailController,
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface), // Text color
+          decoration: ThemeHelper()
+              .textInputDecoration(
+                'Telephone No. or Email Address',
+                'Enter your Email  or Telephone.',
+              )
+              .copyWith(
+                fillColor: Theme.of(context)
                     .colorScheme
-                    .onSurface
-                    .withOpacity(0.6), // Hint text color
+                    .surface, // Background color for input
+                filled: true,
+                hintStyle: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.6), // Hint text color
+                ),
               ),
-            ),
-        validator: (value) {
-          final email = value?.trim(); // Trim whitespace
-          if (email == null || email.isEmpty) {
-            return 'Please Enter your Email Address';
-          }
-          // Improved regex for email validation
-          final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-          if (!emailRegex.hasMatch(email)) {
-            return 'Please Enter a Valid Email Address';
-          }
-          return null;
-        },
-      ),
+          validator: (value) {
+            final input = value?.trim();
+            if (input == null || input.isEmpty) {
+              return 'Please enter your Email Address or Telephone No.';
+            }
+
+            final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+            final phoneRegex = RegExp(
+                r'^\+?\d{7,15}$'); // supports optional "+" and 7-15 digits
+
+            if (!emailRegex.hasMatch(input) && !phoneRegex.hasMatch(input)) {
+              return 'Please enter a valid Email Address or Telephone No.';
+            }
+
+            return null;
+          }),
     );
   }
 
@@ -102,9 +105,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
     _formKey.currentState!.save();
 
-    Loading().loader(context, "Sending Email...Please wait");
+    Loading().loader(context, "Sending Email and SMS...Please wait");
 
-    var data = {'email': _emailController.text};
+    var data = {'email_or_phone': _emailController.text};
     var res = await CallApi().postData(data, 'user/forgot-password');
 
     var body = json.decode(res.body);

@@ -147,16 +147,104 @@ class _SubscriptionStatusCardState extends State<SubscriptionStatusCard> {
     );
   }
 
+  // Widget upgradeCard() {
+  //   final plan = _subscriptionData?['sbscription_title'] ?? 'N/A';
+  //   //print("SUBSCRIPTION DATA"+_subscriptionData.toString());
+
+  //   final propertyCount = _subscriptionData?['properties_count'] ?? '0';
+  //   final validUntil = _subscriptionData?['end_date'] ?? 'N/A';
+  //   final properties_post_count =
+  //       _subscriptionData?['properties_post_count'] ?? '0';
+
+  //   if (propertyCount >= properties_post_count) {
+  //     return renewCard();
+  //   } else {
+  //     return Card(
+  //       margin: const EdgeInsets.all(12),
+  //       shape: RoundedRectangleBorder(
+  //         side: const BorderSide(color: Colors.green, width: 1),
+  //         borderRadius: BorderRadius.circular(8),
+  //       ),
+  //       child: Padding(
+  //         padding: const EdgeInsets.all(12),
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             const Text(
+  //               'Subscription Active',
+  //               style: TextStyle(
+  //                 fontSize: 14,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: Colors.green,
+  //               ),
+  //             ),
+  //             const SizedBox(height: 8),
+  //             Row(
+  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //               children: [
+  //                 Text(
+  //                   'Current Plan: $plan',
+  //                   style: const TextStyle(fontSize: 14),
+  //                 ),
+  //                 Text(
+  //                   'Utilized: $propertyCount / $properties_post_count',
+  //                   style: const TextStyle(fontSize: 14),
+  //                 ),
+  //               ],
+  //             ),
+  //             const SizedBox(height: 6),
+  //             Row(
+  //               children: [
+  //                 Text(
+  //                   'Valid Until: ${_formatDate(validUntil)}',
+  //                   style: const TextStyle(fontSize: 14),
+  //                 ),
+  //               ],
+  //             ),
+  //             Align(
+  //               alignment: Alignment.centerRight,
+  //               child: ElevatedButton(
+  //                 onPressed: () {
+  //                   Navigator.push(
+  //                     context,
+  //                     MaterialPageRoute(
+  //                       builder: (context) => SubscriptionPage2(
+  //                         propertyID: int.parse(0.toString()),
+  //                       ),
+  //                     ),
+  //                   );
+  //                 },
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: Colors.green,
+  //                   minimumSize: const Size(150, 36),
+  //                   padding:
+  //                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  //                 ),
+  //                 child: const Text(
+  //                   'Upgrade Subscription',
+  //                   style: TextStyle(fontSize: 14, color: Colors.white),
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
+
   Widget upgradeCard() {
     final plan = _subscriptionData?['sbscription_title'] ?? 'N/A';
-    //print("SUBSCRIPTION DATA"+_subscriptionData.toString());
-
     final propertyCount = _subscriptionData?['properties_count'] ?? '0';
     final validUntil = _subscriptionData?['end_date'] ?? 'N/A';
     final properties_post_count =
         _subscriptionData?['properties_post_count'] ?? '0';
 
-    if (propertyCount >= properties_post_count) {
+    // Check if subscription is unlimited (properties_post_count == -1)
+    final isUnlimited = properties_post_count == -1;
+
+    // Only show renew card if not unlimited AND property count >= limit
+    if (!isUnlimited && propertyCount >= properties_post_count) {
       return renewCard();
     } else {
       return Card(
@@ -183,11 +271,13 @@ class _SubscriptionStatusCardState extends State<SubscriptionStatusCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Current Plan: $plan',
+                    'Plan: $plan',
                     style: const TextStyle(fontSize: 14),
                   ),
                   Text(
-                    'Utilized: $propertyCount / $properties_post_count',
+                    isUnlimited
+                        ? 'Utilized: $propertyCount / Unlimited'
+                        : 'Utilized: $propertyCount / $properties_post_count',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
