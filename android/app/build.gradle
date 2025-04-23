@@ -16,8 +16,8 @@ android {
     ndkVersion = "25.1.8937393"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     packagingOptions {
@@ -25,14 +25,14 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     defaultConfig {
         applicationId "ke.co.justhomes.app"
         minSdk = 24 
         targetSdk = flutter.targetSdkVersion
-        versionCode = 43
+        versionCode = 44
         versionName = flutter.versionName
     }
 
