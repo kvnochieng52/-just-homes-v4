@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_meta_sdk/flutter_meta_sdk.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_apartment_live/api/api.dart';
 import 'package:just_apartment_live/models/configuration.dart';
@@ -79,6 +80,12 @@ class _DashBoardPageState extends State<DashBoardPage>
       var body = json.decode(res.body);
 
       if (body['success']) {
+        FlutterMetaSdk().logEvent(
+          name: 'customerAtDashboard',
+          parameters: {
+            'dashboard': 'CustomerOnDashboard',
+          },
+        );
         if (mounted) {
           setState(() {
             _latestProperties = body['data']['latestProperties'];

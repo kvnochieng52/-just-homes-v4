@@ -20,6 +20,7 @@ import 'package:http/http.dart' as http;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_meta_sdk/flutter_meta_sdk.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -150,6 +151,12 @@ class _LoginPageState extends State<LoginPage> {
         SharedPreferences localStorage = await SharedPreferences.getInstance();
         localStorage.setString('user', json.encode(body['data']));
         Navigator.pop(context);
+        FlutterMetaSdk().logEvent(
+          name: 'customerLoginApple',
+          parameters: {
+            'button_id': 'loggin with Apple button was clicked',
+          },
+        );
         return Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const DashBoardPage()),
@@ -294,6 +301,14 @@ class _LoginPageState extends State<LoginPage> {
         SharedPreferences localStorage = await SharedPreferences.getInstance();
         localStorage.setString('user', json.encode(body['data']));
         Navigator.pop(context);
+
+        FlutterMetaSdk().logEvent(
+          name: 'customerLogin',
+          parameters: {
+            'button_id': 'loggin button was clicked',
+          },
+        );
+
         return Navigator.push(context,
             MaterialPageRoute(builder: (context) => const DashBoardPage()));
       } else {
@@ -400,6 +415,13 @@ class _LoginPageState extends State<LoginPage> {
 
     final Uri deepLinkUrl =
         Uri.parse('https://justhomes.co.ke/login/google-android');
+
+    FlutterMetaSdk().logEvent(
+      name: 'customerLoginGoogle',
+      parameters: {
+        'button_id': 'loggin with Google button was clicked',
+      },
+    );
 
     if (await canLaunchUrl(deepLinkUrl)) {
       await launchUrl(

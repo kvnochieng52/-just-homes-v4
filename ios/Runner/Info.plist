@@ -45,5 +45,20 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+  <key>CFBundleURLSchemes</key>
+  <array>
+    <string>fb[APP_ID]</string>
+  </array>
+  </dict>
+</array>
+<key>FacebookAppID</key>
+<string>2414282322267242</string>
+<key>FacebookClientToken</key>
+<string>42316075b019445c7733d0c0e76ded7a</string>
+<key>FacebookDisplayName</key>
+<string>Just Homes App</string>
 </dict>
 </plist>
